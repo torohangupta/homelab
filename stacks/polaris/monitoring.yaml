@@ -1,0 +1,71 @@
+# Monitoring and updating services
+services:
+
+  # NOTES -----------------------------------------------------------
+  #   This is a monitoring and updating suite of containers to help
+  #   monitor, notify and update all of my containers on my primary
+  #   server
+  #
+  #   The applications consist of UptimeKuma, Beszel & Watchtower
+  # -----------------------------------------------------------------
+
+
+  # -----------------------------------------------------------------
+  # Uptime Kuma - https://github.com/louislam/uptime-kuma/
+  uptimekuma:
+    container_name: uptimekuma
+    image: louislam/uptime-kuma:latest
+    restart: always
+
+    ports:
+      -  2001:3001
+
+    volumes:
+      - /data/uptimekuma:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock
+  # -----------------------------------------------------------------
+
+
+  # -----------------------------------------------------------------
+  # Beszel - https://beszel.dev/guide/hub-installation
+  beszel:
+    container_name: beszel
+    image: henrygd/beszel:latest
+    restart: always
+
+    ports:
+      - 2004:8090
+
+    volumes:
+      - /data/beszel/data:/beszel_data
+      - /data/beszel/socket:/beszel_socket
+  # -----------------------------------------------------------------
+
+
+  # -----------------------------------------------------------------
+  # Beszel Agent - https://beszel.dev/guide/agent-installation
+  beszel-agent:
+    container_name: beszel-agent
+    image: henrygd/beszel-agent
+    restart: always
+    network_mode: host
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /mnt/nvme:/extra-filesystems/nvme0n1p1:ro
+
+    environment:
+      KEY: $BESZEL_PRIVATE_KEY
+  # -----------------------------------------------------------------
+
+
+  # -----------------------------------------------------------------
+  # Watchtower - https://containrrr.dev/watchtower/
+  watchtower:
+    container_name: watchtower
+    image: containrrr/watchtower
+    restart: always
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+  # -----------------------------------------------------------------
