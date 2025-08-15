@@ -1,0 +1,60 @@
+# Minecraft Server
+services:
+
+  # NOTES -----------------------------------------------------------
+  #   Currently a single server deployment, looking into velocity...
+  # -----------------------------------------------------------------
+
+  # Minecraft Server on Docker - https://docker-minecraft-server.readthedocs.io/en/latest/
+  minecraft-server:
+    container_name: minecraft
+    image: itzg/minecraft-server:latest
+    restart: always
+
+    ports:
+      - 25565:25565
+      # Removing port 25585:25585 for webmap- appears to
+      # have a memory leak (?) and crashes the webapp.
+
+    volumes:
+      - /data/minecraft/mc_24:/data
+
+    environment:
+      EULA: TRUE
+
+      # server data
+      TYPE: PAPER
+      DIFFICULTY: hard
+      VERSION: 1.21.1
+      SEED: "8750618331655062137"
+      MEMORY: 8G
+      ENABLE_WHITELIST: TRUE
+      ENABLE_COMMAND_BLOCK: TRUE
+      SERVER_PORT: 25565
+      RCON_PORT: 25575
+
+      # vanity information
+      MOTD: The coolest server on the planet (not clickbait)
+      MAX_PLAYERS: 69
+      ICON: server-icon.png
+      RESOURCE_PACK_ENFORCE: FALSE
+
+      # RCON
+      RCON_PASSWORD: $MINECRAFT_RCON_PASSWORD
+
+      # autostop
+      ENABLE_AUTOSTOP: FALSE
+      AUTOSTOP_TIMEOUT_EST: 259200
+      AUTOSTOP_TIMEOUT_INIT: 1800
+      STOP_SERVER_ANNOUNCE_DELAY: 30
+      STOP_DURATION: 120
+
+      # privacy
+      SNOOPER_ENABLED: FALSE
+
+    healthcheck:
+      test: ["CMD-SHELL", "mc-health"]
+      interval: "3600s"
+      start_period: "3600s"
+      retries: 2
+  # -----------------------------------------------------------------
