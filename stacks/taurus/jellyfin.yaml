@@ -1,0 +1,207 @@
+# Jellyfin Stack
+services:
+
+  # NOTES -----------------------------------------------------------
+  #   Jellyfin stack to replace streaming services
+  #
+  #   Services:
+  #     Prowlarr      - Indexer manager
+  #     Flaresolverr  - Proxy service for Prowlarr
+  #     Transmission  - Download manager
+
+  #     Sonarr        - Manager for shows
+  #     Radarr        - Manager for movies
+
+  #     Jellyfin      - Watch media
+  #     Jellyseerr    - Request media
+  # -----------------------------------------------------------------
+
+
+  # -----------------------------------------------------------------
+  # Prowlarr - https://docs.linuxserver.io/images/docker-prowlarr/
+  prowlarr:
+    container_name: prowlarr
+    image: linuxserver/prowlarr:latest
+    restart: always
+
+    ports:
+      - 9696:9696
+
+    environment:
+      PUID: 1001
+      PGID: 1001
+      TZ: America/Chicago
+
+    volumes:
+      - /data/prowlarr/config:/config
+
+    depends_on:
+      - transmission
+  # -----------------------------------------------------------------
+
+
+  # -----------------------------------------------------------------
+  # Flaresolverr - https://github.com/FlareSolverr/FlareSolverr
+  flaresolverr:
+    container_name: flaresolverr
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    restart: always
+
+    ports:
+      - 8191:8191
+
+    environment:
+      TZ: America/Chicago
+
+    depends_on:
+      - prowlarr
+  # -----------------------------------------------------------------
+
+
+  # -----------------------------------------------------------------
+  # Transmission - https://github.com/haugene/docker-transmission-openvpn
+  transmission:
+    container_name: transmission
+    image: haugene/transmission-openvpn:latest
+    restart: always
+
+    ports:
+      - 9091:9091
+
+    environment:
+      PUID: 1001
+      PGID: 1001
+      TZ: America/Chicago
+
+      # VPN config
+      CREATE_TUN_DEVICE: true
+      OPENVPN_PROVIDER: NORDVPN
+      OPENVPN_CONFIG: $TRANSMISSION_OVPN_CONFIG
+      OPENVPN_USERNAME: $TRANSMISSION_OVPN_USERNAME
+      OPENVPN_PASSWORD: $TRANSMISSION_OVPN_PASSWORD
+
+      WEBPROXY_ENABLED: false
+      TRANSMISSION_IDLE_SEEDING_LIMIT_ENABLED: true
+      TRANSMISSION_SEED_QUEUE_ENABLED: true
+      
+      LOCAL_NETWORK: 192.168.0.0/16
+
+      TRANSMISSION_INCOMPLETE_DIR_ENABLED: true              # enable incomplete dir
+      TRANSMISSION_DOWNLOAD_DIR: /downloads/complete
+      TRANSMISSION_INCOMPLETE_DIR: /downloads/incomplete     # incomplete downloads
+
+      TRANSMISSION_WATCH_DIR_ENABLED: false
+
+    cap_add:
+      - NET_ADMIN
+
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+
+    volumes:
+      - /data/transmission/config:/config
+      - /data/transmission/data:/data
+      - /mnt/bulk/downloads:/downloads
+  # -----------------------------------------------------------------
+
+
+  # -----------------------------------------------------------------
+  # Sonarr - https://docs.linuxserver.io/images/docker-sonarr/
+  sonarr:
+    container_name: sonarr
+    image: linuxserver/sonarr:latest
+    restart: always
+
+    ports:
+      - 8989:8989
+      
+    environment:
+      PUID: 1001
+      PGID: 1001
+      TZ: America/Chicago
+
+    volumes:
+      - /data/sonarr:/config
+      - /mnt/bulk/downloads:/downloads
+      - /mnt/bulk/media:/media
+      
+    depends_on:
+      - prowlarr
+  # -----------------------------------------------------------------
+
+
+  # -----------------------------------------------------------------
+  # Radarr - https://docs.linuxserver.io/images/docker-radarr/
+  radarr:
+    container_name: radarr
+    image: linuxserver/radarr:latest
+    restart: always
+
+    ports:
+      - 7878:7878
+      
+    environment:
+      PUID: 1001
+      PGID: 1001
+      TZ: America/Chicago
+
+    volumes:
+      - /data/radarr:/config
+      - /mnt/bulk/downloads:/downloads
+      - /mnt/bulk/media:/media
+
+    depends_on:
+      - prowlarr
+  # -----------------------------------------------------------------
+
+
+  # -----------------------------------------------------------------
+  # Jellyfin - https://docs.linuxserver.io/images/docker-jellyfin/
+  jellyfin:
+    container_name: jellyfin
+    image: linuxserver/jellyfin:latest
+    restart: always
+
+    ports:
+      - 8096:8096
+
+    environment:
+      PUID: 1001
+      PGID: 1001
+      LIBVA_DRIVER_NAME: i965
+
+    devices:
+      - /dev/dri:/dev/dri
+
+    group_add:
+      - 44      # video group ID
+      - 109     # render group ID
+      - 993     # input group ID
+
+    volumes:
+      - /data/jellyfin/config:/config
+      - /data/jellyfin/cache:/cache
+      - /mnt/bulk/media:/media
+  # -----------------------------------------------------------------
+
+
+  # -----------------------------------------------------------------
+  # Jellyseerr - https://docs.jellyseerr.dev/getting-started/docker
+  jellyseerr:
+    container_name: jellyseerr
+    image: ghcr.io/fallenbagel/jellyseerr
+    restart: always
+
+    ports:
+      - 5055:5055
+
+    environment:
+      PUID: 1001
+      PGID: 1001
+      TZ: America/Chicago
+
+    volumes:
+      - /data/jellyseerr:/app/config
+  # -----------------------------------------------------------------
