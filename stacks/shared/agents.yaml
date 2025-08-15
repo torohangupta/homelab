@@ -1,0 +1,34 @@
+# A collection of deployed agents services on all my servers
+services:
+
+  # NOTES -----------------------------------------------------------
+  #   Ideally I deploy portainer within this stack configuration,
+  #   but due to how it's managed, a direct deployment is more
+  #   work than it is worth :(
+  # -----------------------------------------------------------------
+
+
+  # Beszel - https://beszel.dev/guide/agent-installation
+  beszel:
+    container_name: beszel-agent
+
+    image: henrygd/beszel-agent
+    restart: always
+    network_mode: host
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /mnt/bulk:/extra-filesystems/sdb1:ro
+
+    environment:
+      KEY: $BESZEL_PRIVATE_KEY
+
+
+  # Watchtower - https://containrrr.dev/watchtower/
+  watchtower:
+    container_name: watchtower
+
+    image: containrrr/watchtower
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
