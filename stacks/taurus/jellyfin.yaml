@@ -22,7 +22,7 @@ services:
   prowlarr:
     container_name: prowlarr
     image: linuxserver/prowlarr:latest
-    restart: always
+    restart: unless-stopped
 
     ports:
       - 9696:9696
@@ -45,7 +45,7 @@ services:
   flaresolverr:
     container_name: flaresolverr
     image: ghcr.io/flaresolverr/flaresolverr:latest
-    restart: always
+    restart: unless-stopped
 
     ports:
       - 8191:8191
@@ -63,7 +63,7 @@ services:
   transmission:
     container_name: transmission
     image: haugene/transmission-openvpn:latest
-    restart: always
+    restart: unless-stopped
 
     ports:
       - 9091:9091
@@ -112,7 +112,7 @@ services:
   sonarr:
     container_name: sonarr
     image: linuxserver/sonarr:latest
-    restart: always
+    restart: unless-stopped
 
     ports:
       - 8989:8989
@@ -138,7 +138,7 @@ services:
   radarr:
     container_name: radarr
     image: linuxserver/radarr:latest
-    restart: always
+    restart: unless-stopped
 
     ports:
       - 7878:7878
@@ -164,7 +164,7 @@ services:
   jellyfin:
     container_name: jellyfin
     image: linuxserver/jellyfin:latest
-    restart: always
+    restart: unless-stopped
 
     ports:
       - 8096:8096
@@ -194,7 +194,7 @@ services:
   jellyseerr:
     container_name: jellyseerr
     image: ghcr.io/fallenbagel/jellyseerr
-    restart: always
+    restart: unless-stopped
 
     ports:
       - 5055:5055
