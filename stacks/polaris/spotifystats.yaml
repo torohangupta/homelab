@@ -1,0 +1,61 @@
+# Spotify stats visualizer
+services:
+
+  # NOTES -----------------------------------------------------------
+  #   A stack to visualize my music listening patterns
+  #
+  #
+  #   URL : https://github.com/Yooooomi/your_spotify
+  # -----------------------------------------------------------------
+
+
+  # -----------------------------------------------------------------
+  # client
+  client:
+    container_name: spotify_client
+    image: yooooomi/your_spotify_client
+    restart: always
+
+    ports:
+      - 2010:3000
+
+    depends_on:
+      - server
+
+    environment:
+      API_ENDPOINT: $API_ENDPOINT
+  # -----------------------------------------------------------------
+
+
+  # -----------------------------------------------------------------
+  # server
+  server:
+    container_name: spotify_server
+    image: yooooomi/your_spotify_server
+    restart: always
+
+    ports:
+      - 2011:8080
+
+    environment:
+      API_ENDPOINT:     $API_ENDPOINT
+      CLIENT_ENDPOINT:  $CLIENT_ENDPOINT
+      SPOTIFY_PUBLIC:   $SPOTIFY_PUBLIC
+      SPOTIFY_SECRET:   $SPOTIFY_SECRET
+
+    depends_on:
+      - mongo
+  # -----------------------------------------------------------------
+
+
+  # -----------------------------------------------------------------
+  # database
+  mongo:
+    container_name: spotify_db
+    image: mongo:6
+    restart: always
+
+    volumes:
+      - /data/spotifystats/db:/data/db
+      - /data/spotifystats/dbconfig:/data/configdb
+  # -----------------------------------------------------------------
