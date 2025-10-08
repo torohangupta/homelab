@@ -53,6 +53,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /mnt/nvme:/extra-filesystems/nvme0n1p1:ro
+      - /data/beszel/agent:/var/lib/beszel-agent
 
     environment:
       KEY: $BESZEL_PRIVATE_KEY
