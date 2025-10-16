@@ -1,20 +1,152 @@
-# Minecraft Server
 services:
-
   # NOTES -----------------------------------------------------------
-  #   Currently a single server deployment, looking into velocity...
+  # This .yaml file contains a proxy & collection of minecraft servers, as doucmented below
+
+  # Servers:
+  #   Modded (AllTheMods)
+  #   Summer 2024 server (Vanilla+)
+  #   Skyblock (Vanilla+)
+  
+  # Proxy - https://github.com/itzg/docker-mc-proxy
+  # Paper Server - https://docker-minecraft-server.readthedocs.io/en/latest/
+  # AllTheMods10 - https://hub.docker.com/r/w3lfare/allthemods10
   # -----------------------------------------------------------------
 
-  # Minecraft Server on Docker - https://docker-minecraft-server.readthedocs.io/en/latest/
-  minecraft-server:
-    container_name: minecraft
-    image: itzg/minecraft-server:latest
-    restart: always
 
-    ports:
-      - 25565:25565
-      # Removing port 25585:25585 for webmap- appears to
-      # have a memory leak (?) and crashes the webapp.
+  # -----------------------------------------------------------------
+  # Minecraft Proxy - https://github.com/itzg/docker-mc-proxy
+  minecraft-proxy:
+    container_name: minecraft-proxy
+    image: itzg/mc-proxy
+    restart: unless-stopped
+
+    # Proxy default port is 25577- forward the minecraft default port (25565) to the proxy
+    ports: 25565:25577
+
+    networks:
+      - minecraft
+
+    volumes:
+      - /data/minecraft/proxy/server:/server
+
+    environment:
+      # server data/settings
+      TYPE: VELOCITY
+      VELOCITY_FORWARDING_SECRET: $VELOCITY_FORWARDING_SECRET
+      MEMORY: 512m
+
+      # vanity information
+      MOTD: The coolest proxy on the planet (not clickbait)
+      MAX_PLAYERS: 69
+      ICON: server-icon.png
+  # -----------------------------------------------------------------
+
+
+  # -----------------------------------------------------------------
+  # Skyblock - Vanilla - Winter 2025
+  skyblock:
+    container_name: skyblock
+    image: itzg/minecraft-server
+    restart: unless-stopped
+
+    # no exposed port- docker networking handles it, as well as the .toml file
+
+    networks:
+      - minecraft
+
+    volumes:
+      - /data/minecraft/skyblock:/data
+
+    environment:
+      EULA: TRUE
+
+      # server data/settings
+      TYPE: PAPER
+      DIFFICULTY: hard
+      VERSION: 1.21.9
+      MEMORY: 8G
+      ENABLE_WHITELIST: TRUE
+      ENABLE_COMMAND_BLOCK: TRUE
+      SERVER_PORT: 25565
+
+      # proxy settings - proxy handles auth and online things
+      ONLINE_MODE: FALSE
+      VELOCITY_FORWARDING_SECRET: $VELOCITY_FORWARDING_SECRET
+
+      # vanity information
+      MOTD: The coolest server on the planet (not clickbait)
+      MAX_PLAYERS: 69
+      ICON: server-icon.png
+
+      # privacy
+      SNOOPER_ENABLED: FALSE
+
+    healthcheck:
+      test: ["CMD-SHELL", "mc-health"]
+      interval: "3600s"
+      start_period: "3600s"
+      retries: 2
+  # -----------------------------------------------------------------
+
+
+  # -----------------------------------------------------------------
+  # Modded - AllTheMods10 - Winter 2025
+  mc25-modded:
+    container_name: mc25-modded
+    image: w3lfare/allthemods10
+    restart: unless-stopped
+
+    # no exposed port- docker networking handles it, as well as the .toml file
+
+    networks:
+      - minecraft
+
+    volumes:
+      - /data/minecraft/modded25:/data
+
+    environment:
+      EULA: TRUE
+
+      # server data
+      DIFFICULTY: hard
+      JVM_OPTS: "-Xms8192m -Xmx8192m"
+      ENABLE_WHITELIST: TRUE
+      ENABLE_COMMAND_BLOCK: TRUE
+      SERVER_PORT: 25565
+
+      # proxy settings - proxy handles auth and online things
+      ONLINE_MODE: FALSE
+      VELOCITY_FORWARDING_SECRET: $VELOCITY_FORWARDING_SECRET
+
+      # vanity information
+      MOTD: The coolest modded server on the planet (not clickbait)
+      MAX_PLAYERS: 69
+      ICON: server-icon.png
+      RESOURCE_PACK_ENFORCE: FALSE
+
+      # autostop
+      ENABLE_AUTOSTOP: FALSE
+      AUTOSTOP_TIMEOUT_EST: 259200
+      AUTOSTOP_TIMEOUT_INIT: 1800
+      STOP_SERVER_ANNOUNCE_DELAY: 30
+      STOP_DURATION: 120
+
+      # privacy
+      SNOOPER_ENABLED: FALSE
+  # -----------------------------------------------------------------
+
+
+  # -----------------------------------------------------------------
+  # Vanilla+ - Summer 2024
+  mc24:
+    container_name: mc24
+    image: itzg/minecraft-server
+    restart: unless-stopped
+
+    # no exposed port- docker networking handles it, as well as the .toml file
+
+    networks:
+      - minecraft
 
     volumes:
       - /data/minecraft/mc_24:/data
@@ -22,7 +154,7 @@ services:
     environment:
       EULA: TRUE
 
-      # server data
+      # server data/settings
       TYPE: PAPER
       DIFFICULTY: hard
       VERSION: 1.21.1
@@ -31,7 +163,10 @@ services:
       ENABLE_WHITELIST: TRUE
       ENABLE_COMMAND_BLOCK: TRUE
       SERVER_PORT: 25565
-      RCON_PORT: 25575
+
+      # proxy settings - proxy handles auth and online things
+      ONLINE_MODE: FALSE
+      VELOCITY_FORWARDING_SECRET: $VELOCITY_FORWARDING_SECRET
 
       # vanity information
       MOTD: The coolest server on the planet (not clickbait)
@@ -40,6 +175,7 @@ services:
       RESOURCE_PACK_ENFORCE: FALSE
 
       # RCON
+      RCON_PORT: 25575
       RCON_PASSWORD: $MINECRAFT_RCON_PASSWORD
 
       # autostop
@@ -58,3 +194,8 @@ services:
       start_period: "3600s"
       retries: 2
   # -----------------------------------------------------------------
+
+
+networks:
+  minecraft:
+    external: true
