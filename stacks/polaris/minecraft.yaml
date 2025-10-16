@@ -21,7 +21,8 @@ services:
     restart: unless-stopped
 
     # Proxy default port is 25577- forward the minecraft default port (25565) to the proxy
-    ports: 25565:25577
+    ports:
+      - 25565:25577
 
     networks:
       - minecraft
@@ -63,7 +64,7 @@ services:
       # server data/settings
       TYPE: PAPER
       DIFFICULTY: hard
-      VERSION: 1.21.9
+      VERSION: 1.21.1
       MEMORY: 8G
       ENABLE_WHITELIST: TRUE
       ENABLE_COMMAND_BLOCK: TRUE
@@ -102,7 +103,7 @@ services:
       - minecraft
 
     volumes:
-      - /data/minecraft/modded25:/data
+      - /data/minecraft/modded_25:/data
 
     environment:
       EULA: TRUE
