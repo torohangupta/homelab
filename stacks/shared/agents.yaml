@@ -30,7 +30,7 @@ services:
   # Watchtower - https://containrrr.dev/watchtower/
   watchtower:
     container_name: watchtower
-    image: containrrr/watchtower
+    image: nickfedor/watchtower
     restart: always
 
     volumes:
