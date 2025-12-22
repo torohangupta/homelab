@@ -22,7 +22,7 @@ services:
 
       # mounted volumes
       - /mnt/bulk:/extra-filesystems/sdb1:ro
-      - /mnt/cygnus:/extra-filesystems/sdb1:ro
+      - /mnt/cygnus:/extra-filesystems/cygnus:ro
 
     environment:
       KEY: $BESZEL_PRIVATE_KEY
