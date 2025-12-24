@@ -103,7 +103,7 @@ services:
     volumes:
       - /data/transmission/config:/config
       - /data/transmission/data:/data
-      - /mnt/bulk/downloads:/downloads
+      - /mnt/cygnus/downloads:/downloads
   # -----------------------------------------------------------------
 
 
@@ -124,8 +124,8 @@ services:
 
     volumes:
       - /data/sonarr:/config
-      - /mnt/bulk/downloads:/downloads
-      - /mnt/bulk/media:/media
+      - /mnt/cygnus/downloads:/downloads
+      - /mnt/cygnus/media:/media
       
     depends_on:
       - prowlarr
@@ -150,8 +150,8 @@ services:
 
     volumes:
       - /data/radarr:/config
-      - /mnt/bulk/downloads:/downloads
-      - /mnt/bulk/media:/media
+      - /mnt/cygnus/downloads:/downloads
+      - /mnt/cygnus/media:/media
 
     depends_on:
       - prowlarr
@@ -185,7 +185,7 @@ services:
     volumes:
       - /data/jellyfin/config:/config
       - /data/jellyfin/cache:/cache
-      - /mnt/bulk/media:/media
+      - /mnt/cygnus/media:/media
   # -----------------------------------------------------------------
 
 
