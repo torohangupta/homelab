@@ -21,7 +21,6 @@ services:
       - /data/beszel/agent:/var/lib/beszel-agent
 
       # mounted volumes
-      - /mnt/bulk:/extra-filesystems/sdb1:ro
       - /mnt/cygnus:/extra-filesystems/cygnus:ro
 
     environment:
