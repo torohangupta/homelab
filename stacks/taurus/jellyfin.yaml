@@ -172,14 +172,12 @@ services:
     environment:
       PUID: 1001
       PGID: 1001
-      LIBVA_DRIVER_NAME: i965
 
     devices:
       - /dev/dri:/dev/dri
 
     group_add:
       - 44      # video group ID
-      - 109     # render group ID
       - 993     # input group ID
 
     volumes:
