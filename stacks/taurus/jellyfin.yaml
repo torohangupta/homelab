@@ -53,8 +53,8 @@ services:
     environment:
       TZ: America/Chicago
 
-    depends_on:
-      - prowlarr
+    volumes:
+      - /data/flaresolverr/config:/config
   # -----------------------------------------------------------------
 
 
