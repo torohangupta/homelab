@@ -188,11 +188,10 @@ services:
 
 
   # -----------------------------------------------------------------
-  # Jellyseerr - https://docs.jellyseerr.dev/getting-started/docker
-  jellyseerr:
-    container_name: jellyseerr
-    image: ghcr.io/fallenbagel/jellyseerr
-    restart: unless-stopped
+  # Seerr - https://docs.seerr.dev/getting-started
+  seerr:
+    container_name: seerr
+    image: ghcr.io/seerr-team/seerr:latest
 
     ports:
       - 5055:5055
@@ -203,5 +202,13 @@ services:
       TZ: America/Chicago
 
     volumes:
-      - /data/jellyseerr:/app/config
+      - /data/seerr:/app/config
+
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1
+      start_period: 20s
+      timeout: 3s
+      interval: 15s
+      retries: 3
+    restart: unless-stopped
   # -----------------------------------------------------------------
